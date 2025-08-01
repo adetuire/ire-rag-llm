@@ -20,6 +20,9 @@ cd ire-rag-llm
 # Windows: ".venv\Scripts\activate"
 # macOS/Linux: "source .venv/bin/activate"
 
+# exit the virtual environment
+"(.venv) $ deactivate"
+
 "pip install -r requirements.txt"
 # or for editable install:
 # "pip install -e ."
@@ -63,3 +66,4 @@ Endpoints
     "OPENAI_API_KEY=..."
     "GOOGLE_API_KEY=..."
 .gitignore already excludes .env, .venv/, cache, data outputs, etc.
+```

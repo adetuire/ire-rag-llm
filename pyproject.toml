@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ire-rag-llm"
 version = "0.1.0"
+requires-python = ">=3.10"
 readme = "README.md"
 dependencies = [
   "fastapi>=0.95.0",
@@ -19,12 +20,17 @@ dependencies = [
   "sentence-transformers>=2.2.2",
   "faiss-cpu>=1.7.2",
   "torch>=2.0.0",
-  "bs4",
+  "beautifulsoup4>=4.12.2",
 ]
 
+#tells setuptools to look inside /src
+[tool.setuptools.packages.find]
+where = ["src"] 
+
+#creates the two console-scripts
 [project.scripts]
-run-retrieval = "src.rag.run_retrieval:main"
-run-rag       = "src.rag.run_rag:main"
+run-retrieval = "rag.run_retrieval:main"
+run-rag       = "rag.run_rag:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
