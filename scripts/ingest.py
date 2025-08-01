@@ -1,20 +1,17 @@
-# scripts/ingest.py
 """
-Downloads Lilian Weng’s “LLM-Powered Autonomous Agents” blog post
-Splits into ~1 000-char chunks
-Embeds with text-embedding-3-large
-Saves a single FAISS index to data/faiss_index.faiss
-Run:
+Index Lilian Weng’s “LLM-Powered Autonomous Agents” blog post
+into a FAISS vector store using a free HuggingFace embedder.
+Run once:
     python scripts/ingest.py
 """
-import bs4, os, pickle
+
+import bs4
 from pathlib import Path
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from dotenv import load_dotenv
-load_dotenv() 
+
 INDEX_PATH = Path("data/faiss_index.faiss")
 INDEX_PATH.parent.mkdir(exist_ok=True)
 
@@ -34,8 +31,8 @@ splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 chunks = splitter.split_documents(docs)
 
 # Embed and create FAISS
-embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
-store = FAISS.from_documents(chunks, embeddings)
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+store      = FAISS.from_documents(chunks, embeddings)
 
 store.save_local(str(INDEX_PATH))
 print(f"FAISS index with {len(chunks)} chunks saved to {INDEX_PATH}")

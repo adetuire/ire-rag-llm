@@ -1,4 +1,7 @@
-from __future__ import annotations
+"""
+Pure retrieval: load the FAISS index and return top-k chunks for any question.
+No API keys, no paid calls. Free, local embedding + FAISS only.
+"""
 
 import os
 import faiss
@@ -7,56 +10,41 @@ import getpass
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAiEmbeddings
 from langchain.text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv() 
-_VECTOR_PATH = Path("data/faiss_index.faiss")
 
 # choose Gemini 
-if not os.getenv("GOOGLE_API_KEY"):
-    key = getpass.getpass("Enter API Key for Google Gemini (leave blank to skip): ")
-    if key:
-        os.environ["GOOGLE_API_KEY"] = key 
+#if not os.getenv("GOOGLE_API_KEY"):
+#    key = getpass.getpass("Enter API Key for Google Gemini (leave blank to skip): ")
+#    if key:
+#        os.environ["GOOGLE_API_KEY"] = key 
 
 # choose OpenAI
-if not os.getenv("OPENAI_API_KEY"):
-    key = getpass.getpass("Enter API key for OpenAI (leave blank to skip): ")
-    if key:
-        os.environ["OPENAI_API_KEY"] = key 
+#if not os.getenv("OPENAI_API_KEY"):
+#    key = getpass.getpass("Enter API key for OpenAI (leave blank to skip): ")
+#    if key:
+#        os.environ["OPENAI_API_KEY"] = key 
 
 # LLM
-if os.getenv("GOOGLE_API_KEY"):
-    llm = init_chat_model("grmini-2.5-flash", model_provider="google_genai")
-else:
-    llm = init_chat_model("gpt-3.5-turbo", model_provider="openai")
+#if os.getenv("GOOGLE_API_KEY"):
+#    llm = init_chat_model("grmini-2.5-flash", model_provider="google_genai")
+#else:
+#    llm = init_chat_model("gpt-3.5-turbo", model_provider="openai")
 
-VECTOR_PATH = Path("data/faiss_index.false")
-
-# embeddings + FAISS vector sector
-embeddings = OpenAiEmbeddings(model="text-embedding-3-large")
-
-if not VECTOR_PATH.exists():
+INDEX_PATH = Path("data/faiss_index.faiss")
+if not INDEX_PATH.exists():
     raise FileNotFoundError(
-        f"FAISS index not found at {VECTOR_PATH}. "
-        "Run  python scripts/ingest.py  first."
+        f"Index not found at {INDEX_PATH}. Run `python scripts/ingest.py` first."
     )
 
-vector = FAISS.load_local(
-    str(VECTOR_PATH),
-    embeddings,
-    allow_dangerous_deserialization=True,   # needed when saving with pickle
-)
+# embeddings + FAISS vector sector
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+vector     = FAISS.load_local(str(INDEX_PATH), embeddings)
 
-def query_rag(question: str) -> str:
+def retrieve(question: str, k: int = 4) -> list[str]:
     """
-    Retrieve-and-generate answer for *question* using the pre-built FAISS store.
+    Return the top-k document chunks most similar to *question*.
     """
-    docs = vector.similarity_search(question, k=4)
-    context = "\n\n".join(d.page_content for d in docs)
-
-    messages = [
-        {"role": "system", "content": "You are a concise, helpful assistant."},
-        {"role": "user",   "content": f"Context:\n{context}\n\nQ: {question}"},
-    ]
-    return llm.invoke(messages).content.strip()
+    docs = vector.similarity_search(question, k=k)
+    return [d.page_content for d in docs]
