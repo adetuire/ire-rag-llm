@@ -1,0 +1,22 @@
+[project]
+name = "ire-rag-llm"
+version = "0.1.0"
+description = "RAG retrieval demo with HF embeddings + FAISS"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "fastapi>=0.95.0",
+  "uvicorn>=0.22.0",
+  "langchain>=0.0.321",
+  "langchain-huggingface>=0.0.29",
+  "langchain-community>=0.0.81",
+  "langchain-core>=0.0.79",
+  "sentence-transformers>=2.2.2",
+  "faiss-cpu>=1.7.2",
+  "huggingface-hub>=0.16.4",
+  "torch>=2.0.0",
+  "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+run-retrieval = "src.rag.run_retrieval:main"

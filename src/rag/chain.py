@@ -10,7 +10,7 @@ import getpass
 
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
-from langchain.text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from pathlib import Path
