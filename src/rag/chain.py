@@ -3,6 +3,7 @@ Pure retrieval: load the FAISS index and return top-k chunks for any question.
 No API keys, no paid calls. Free, local embedding + FAISS only.
 """
 
+from __future__ import annotations
 import os
 import faiss
 import getpass
@@ -10,7 +11,7 @@ import getpass
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAiEmbeddings
 from langchain.text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from pathlib import Path
 
