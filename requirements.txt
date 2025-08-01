@@ -1,5 +1,6 @@
 fastapi>=0.95.0
 uvicorn>=0.22.0
+langgraph>=0.0.79
 langchain>=0.0.321
 langchain-community>=0.0.81
 langchain-huggingface>=0.0.29

@@ -7,7 +7,7 @@ Invokes retrieve_v2() from chain2.py and prints out the top-k chunks.
 """
 
 import argparse
-from src.rag.chain2 import retrieve_v2
+from rag.chain2 import retrieve_v2
 
 def main():
     parser = argparse.ArgumentParser(

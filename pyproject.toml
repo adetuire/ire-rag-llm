@@ -12,6 +12,7 @@ dependencies = [
   "fastapi>=0.95.0",
   "uvicorn>=0.22.0",
   "langchain>=0.0.321",
+  "langgraph>=0.0.79",
   "langchain-huggingface>=0.0.29",
   "langchain-community>=0.0.81",
   "langchain-text-splitters>=0.3.9",
@@ -21,4 +22,8 @@ dependencies = [
 ]
 
 [project.scripts]
-run-retrieval = "src.rag.run_retrieval:main"
+run-retrieval = "rag.run_retrieval:main"
+run-rag       = "rag.run_rag:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
