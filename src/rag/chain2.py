@@ -27,7 +27,11 @@ if not INDEX_PATH.exists():
 
 # Use the *same* new embedder class
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vector     = FAISS.load_local(str(INDEX_PATH), embeddings)
+vector     = FAISS.load_local(
+    str(INDEX_PATH),
+    embeddings,
+    allow_dangerous_deserialization=True,  # safe for your own index
+)
 
 def retrieve_v2(question: str, k: int = 4) -> list[str]:
     """
