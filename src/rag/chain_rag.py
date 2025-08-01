@@ -10,9 +10,29 @@ from langchain_core.documents import Document
 from langchain import hub
 from langgraph.graph import START, StateGraph
 
-# load the store we built above
-with open("data/store.pkl", "rb") as f:
-    vector_store: InMemoryVectorStore = pickle.load(f)
+from pathlib import Path
+from langchain_community.vectorstores import FAISS
+
+FAISS_FP   = Path("data/faiss_index.faiss")
+PICKLE_FP  = Path("data/store.pkl")
+
+if PICKLE_FP.exists():                     # original behaviour
+    import pickle, warnings
+    with PICKLE_FP.open("rb") as f:
+        vector_store = pickle.load(f)
+    print("[chain_rag] loaded in-memory pickle store")
+elif FAISS_FP.exists():                    # fallback – no pickle, use FAISS file
+    from langchain_huggingface import HuggingFaceEmbeddings
+    vector_store = FAISS.load_local(
+        str(FAISS_FP),
+        HuggingFaceEmbeddings("sentence-transformers/all-MiniLM-L6-v2"),
+        allow_dangerous_deserialization=True,
+    )
+    print("[chain_rag] loaded FAISS index")
+else:
+    raise FileNotFoundError(
+        "Neither data/store.pkl nor data/faiss_index.faiss found – run scripts/ingest.py"
+    )
 
 # LLM init (same as before)
 if os.getenv("GOOGLE_API_KEY"):
