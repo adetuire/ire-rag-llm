@@ -36,3 +36,6 @@ store      = FAISS.from_documents(chunks, embeddings)
 
 store.save_local(str(INDEX_PATH))
 print(f"FAISS index with {len(chunks)} chunks saved to {INDEX_PATH}")
+
+if __name__ == "__main__":
+    main()
