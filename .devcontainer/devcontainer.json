@@ -2,7 +2,8 @@
     "name": "ire-rag-llm (Python 3.11)",
     "image": "python:3.11-slim",                                // base Docker image
 
-    "postCreateCommand" : "pip install --upgrade pip",          // PostCreate runs installs Python deps
+                                                                // PostCreate runs installs Python deps
+    "postCreateCommand" : "apt-get update && apt-get install -y git && pip install --upgrade pip",                                                                 
 
     "forwardPorts": [8000],                                     // Forward port 8000 from container to host(FastAPI/vLLM default)
 
