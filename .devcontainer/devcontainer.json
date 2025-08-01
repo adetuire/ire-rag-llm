@@ -1,13 +1,21 @@
 {
+    // Friendly name shown in VS Code status bar
     "name": "ire-rag-llm (Python 3.11)",
-    "image": "python:3.11-slim",                                // base Docker image
 
-                                                                // PostCreate runs installs Python deps
+    // base Docker image
+    "image": "python:3.11-slim",                                
+
+    // PostCreate runs installs Python dependencies right after first boot
+    // - update apt cache
+    // - install git
+    // - upgrade pip
     "postCreateCommand" : "apt-get update && apt-get install -y git && pip install --upgrade pip",                                                                 
 
-    "forwardPorts": [8000],                                     // Forward port 8000 from container to host(FastAPI/vLLM default)
+    // Forward port 8000 from container to host(FastAPI/vLLM default)
+    "forwardPorts": [8000],                                     
 
-    "customizations": {                                         // prompt suggestful code extensions to install
+    // prompt suggestful code extensions to install
+    "customizations": {                                         
         "vscode": {
             "extensions": [
                 "ms-python.python",
@@ -15,5 +23,9 @@
                 "ms-vscode-remote.remote-containers"
             ]
         }
-    }
+    },
+
+    "runArgs": [
+        "--env-file", ".env"
+    ]
 }
