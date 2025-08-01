@@ -1,55 +1,71 @@
+# src/rag/chain_rag.py
 from __future__ import annotations
-import argparse, os, getpass
-from pathlib import Path
+import os, getpass, pickle
+from typing import Literal, List, TypedDict
+from typing_extensions import Annotated
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain.chat_models import init_chat_model
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_core.documents import Document
 from langchain import hub
 from langgraph.graph import START, StateGraph
-from langchain_core.documents import Document
-from typing_extensions import List, TypedDict
 
-INDEX_PATH = Path("data/faiss_index.faiss")
-if not INDEX_PATH.exists():
-    raise FileNotFoundError(f"Index not found at {INDEX_PATH}. Run `python scripts/ingest2.py` first.")
+# load the store we built above
+with open("data/store.pkl", "rb") as f:
+    vector_store: InMemoryVectorStore = pickle.load(f)
 
-llm = None
+# LLM init (same as before)
+if os.getenv("GOOGLE_API_KEY"):
+    llm = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+elif os.getenv("OPENAI_API_KEY"):
+    llm = init_chat_model("gpt-3.5-turbo", model_provider="openai")
+else:
+    raise RuntimeError("Set OPENAI_API_KEY or GOOGLE_API_KEY")
 
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vector     = FAISS.load_local(str(INDEX_PATH), embeddings, allow_dangerous_deserialization=True)
-
-from langchain import hub
+# RAG prompt from hub
 prompt = hub.pull("rlm/rag-prompt")
 
+# structured schema for the analyzed query
+class Search(TypedDict):
+    query: Annotated[str, ..., "Search query to run."]
+    section: Annotated[
+        Literal["beginning", "middle", "end"],
+        ...,
+        "Section to query."
+    ]
+
+# full pipeline state
 class State(TypedDict):
     question: str
-    k: int
-    context: list[Document]
+    query: Search
+    context: List[Document]
     answer: str
 
-def retrieve(state: State) -> dict[str, list[Document]]:
-    # pull out the number of chunks to fetch
-    top_k = state.get("k", 4)
-    retrieved_docs = vector.similarity_search(state["question"], k=top_k)
-    return {"context": retrieved_docs}
+# analyze the raw question into a Search struct
+def analyze_query(state: State):
+    # this helper enforces your Search schema
+    structured_llm = llm.with_structured_output(Search)
+    q = structured_llm.invoke(state["question"])
+    return {"query": q}
 
-# pull the RAG prompt from LangChain’s hub
-prompt = hub.pull("rlm/rag-prompt")
+# retrieve, filtering by section
+def retrieve(state: State):
+    q = state["query"]
+    docs = vector_store.similarity_search(
+        q["query"],
+        filter=lambda d: d.metadata.get("section") == q["section"],
+        k=4
+    )
+    return {"context": docs}
 
-def generate(state: State) -> dict[str, str]:
-    docs_content = "\n\n".join(d.page_content for d in state["context"])
-    messages = prompt.invoke({
-      "question": state["question"],
-      "context": docs_content
-    }).to_messages()
-    response = llm.invoke(messages)
-    return {"answer": response.content}
+# generate final answer 
+def generate(state: State):
+    ctxt = "\n\n".join(d.page_content for d in state["context"])
+    msgs = prompt.invoke({"question": state["question"], "context": ctxt})
+    resp = llm.invoke(msgs)
+    return {"answer": resp.content}
 
-graph = (
-  StateGraph(State)
-  .add_sequence([retrieve, generate])
-  .add_edge(START, "retrieve")
-  .compile()
-)
 
+builder = StateGraph(State).add_sequence([analyze_query, retrieve, generate])
+builder.add_edge(START, "analyze_query")
+graph = builder.compile()

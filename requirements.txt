@@ -2,9 +2,15 @@ fastapi>=0.95.0
 uvicorn>=0.22.0
 langgraph>=0.0.79
 langchain>=0.0.321
+langchain-openai>=0.0.81
+langchain-google>=0.0.81
 langchain-community>=0.0.81
 langchain-huggingface>=0.0.29
 langchain-text-splitters>=0.0.29
+langchain-core>=0.3.72
+huggingface_hub>=0.16.4
 faiss-cpu>=1.7.4
 sentence-transformers>=2.2.2
 python-dotenv>=1.0.0
+torch>=2.0.0
+bs4 

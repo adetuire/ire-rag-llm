@@ -1,0 +1,3 @@
+[console_scripts]
+run-rag = rag.run_rag:main
+run-retrieval = rag.run_retrieval:main

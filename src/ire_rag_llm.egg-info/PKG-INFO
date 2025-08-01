@@ -1,0 +1,26 @@
+Metadata-Version: 2.4
+Name: ire-rag-llm
+Version: 0.1.0
+Summary: RAG retrieval demo with HF embeddings + FAISS
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.95.0
+Requires-Dist: uvicorn>=0.22.0
+Requires-Dist: langchain>=0.0.321
+Requires-Dist: langgraph>=0.0.79
+Requires-Dist: langchain-huggingface>=0.0.29
+Requires-Dist: langchain-openai>=0.0.81
+Requires-Dist: langchain-community>=0.0.81
+Requires-Dist: langchain-text-splitters>=0.3.9
+Requires-Dist: faiss-cpu>=1.7.2
+Requires-Dist: sentence-transformers>=2.2.2
+Requires-Dist: python-dotenv>=1.0.0
+
+# RAG + vLLM demo
+
+GETTING STARTED
+pip install -r requirements.txt
+
+python scripts/ingest2.py
+
+python -m src.rag.run_retrieval -q "..." -k 3
