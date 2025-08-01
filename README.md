@@ -16,17 +16,29 @@ Supports:
 cd ire-rag-llm
 
 # create virtualenv
-"python -m venv .venv"
-# Windows: ".venv\Scripts\activate"
-# macOS/Linux: "source .venv/bin/activate"
+"python -m venv .venv || python3 -m venv .venv"
+# Windows: 
+".venv\Scripts\activate"
+# macOS/Linux: 
+"source .venv/bin/activate"
 
-# exit the virtual environment
-"(.venv) $ deactivate"
-
+# installs the package & console scripts
 "pip install -r requirements.txt"
 # or for editable install:
 # "pip install -e ."
 
+# build the vector store once
+# downloads & indexes the blog post
+"python scripts/ingest.py"   
+
+# ask something
+run-rag -q "What does the end of the post say about Task Decomposition?"
+
+# exit the virtual environment
+"(.venv) $ deactivate"
+
+
+```
 
 ## Prepare & Index
 1.  Drop any .html, .md, or .txt docs into data/raw/.
@@ -66,4 +78,3 @@ Endpoints
     "OPENAI_API_KEY=..."
     "GOOGLE_API_KEY=..."
 .gitignore already excludes .env, .venv/, cache, data outputs, etc.
-```
