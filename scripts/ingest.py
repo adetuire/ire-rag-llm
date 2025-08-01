@@ -12,8 +12,9 @@ from pathlib import Path
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
-from langchain.vectorstores.faiss import FAISS
-
+from langchain_community.vectorstores import FAISS
+from dotenv import load_dotenv
+load_dotenv() 
 INDEX_PATH = Path("data/faiss_index.faiss")
 INDEX_PATH.parent.mkdir(exist_ok=True)
 

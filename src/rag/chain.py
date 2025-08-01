@@ -7,9 +7,10 @@ import getpass
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAiEmbeddings
 from langchain.text_splitters import RecursiveCharacterTextSplitter
-from langchain.vectorstores.faiss import FAISS
+from langchain_community.vectorstores import FAISS
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv() 
 _VECTOR_PATH = Path("data/faiss_index.faiss")
 
 # choose Gemini 
