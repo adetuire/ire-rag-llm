@@ -14,6 +14,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
+load_dotenv()   # loads your .env into os.environ
 
 # suppress the Windows symlink warning 
 os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
