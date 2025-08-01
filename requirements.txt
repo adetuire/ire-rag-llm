@@ -1,0 +1,15 @@
+langchain==0.2.*
+langchain-text-splitters
+langchain-community
+langgraph
+langsmith
+langchain[google-genai]
+langchain-openai
+faiss-cpu
+sentence-transformers
+fastapi
+uvicorn[standard]
+vllm
+pytest
+faiss-cpu
+tiktoken
