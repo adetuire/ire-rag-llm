@@ -10,7 +10,7 @@ import getpass
 
 from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from pathlib import Path
@@ -41,7 +41,12 @@ if not INDEX_PATH.exists():
 
 # embeddings + FAISS vector sector
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vector     = FAISS.load_local(str(INDEX_PATH), embeddings)
+vector = FAISS.load_local(
+    str(INDEX_PATH),
+    embeddings,
+    allow_dangerous_deserialization=True,   # safe for your own index
+)
+
 
 def retrieve(question: str, k: int = 4) -> list[str]:
     """
