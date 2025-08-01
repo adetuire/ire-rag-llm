@@ -1,4 +1,5 @@
 # scripts/ingest.py
+from typing import cast
 import bs4, os, pickle
 from pathlib import Path
 from langchain_community.document_loaders import WebBaseLoader
@@ -27,12 +28,19 @@ def main() -> None:
                            bs_kwargs=dict(parse_only=bs4.SoupStrainer()))
     docs = loader.load()
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = splitter.split_documents(docs)
+    chunks = splitter.split_documents(docs)
 
     # 1/3 tagged "beginning", next third "middle", last third "end"
-    total = len(splits)
+    total = len(chunks)
     third = total // 3
-    for i, d in enumerate(splits):
+
+    from typing import Any, cast
+
+    doc = cast(dict[str, Any], d.metadata)
+    doc["section"] = "end"
+
+
+    for i, d in enumerate(chunks):
         if i < third:
             d.metadata["section"] = "beginning"
         elif i < 2 * third:
@@ -41,6 +49,10 @@ def main() -> None:
             d.metadata["section"] = "end"
 
     # build in-memory store
-    store  = FAISS.from_documents(chunks, embeddings)
+    store = FAISS.from_documents(chunks, embeddings)
     store.save_local(str(VECTOR_FP))
+    import pickle
+    with open("data/store.pkl", "wb") as f:
+        pickle.dump(store, f)
+
     print(f"built index with {len(chunks)} chunks → {VECTOR_FP}")

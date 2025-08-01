@@ -1,5 +1,6 @@
 # src/rag/chain_rag.py
 from __future__ import annotations
+from bs4.filter import SoupStrainer 
 import os, getpass, pickle
 from typing import Literal, List, TypedDict
 from typing_extensions import Annotated
