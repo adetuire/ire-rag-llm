@@ -8,12 +8,12 @@ Creates:
     • data/store.pkl             
 """
 
-import bs4
-from bs4 import SoupStrainer
+from bs4.filter import SoupStrainer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
+from typing import List
 import pickle
 
 from pathlib import Path
