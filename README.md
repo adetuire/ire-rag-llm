@@ -67,18 +67,24 @@ If you’ve built the FAISS index and have an API key in your environment (OpenA
 
 ## FastAPI Server
 Start a local server (defaults to port 8000):
-    "uvicorn rag.app:app --reload --port 8000"
+    
+    # "uvicorn rag.app:app --reload --port 8000"
+    
     # GET /retrieve?question=&k= – top-k chunks
 
     # POST /rag {"question": "...", "k": 4} – RAG answer
 
-Endpoints
+## Endpoints
     GET /retrieve?question=...&k=... -> returns top-k chunks
+    
     POST /rag with JSON {"question": "...", "k": 3} -> returns RAG answer
 
 ## Configuration
 Create a .env alongside pyproject.toml.
+
 .env file in project root (ignored by git) can hold:
-    "OPENAI_API_KEY=..."
-    "GOOGLE_API_KEY=..."
+
+#    "OPENAI_API_KEY=..."
+#    "GOOGLE_API_KEY=..."
+
 .gitignore already excludes .env, .venv/, cache, data outputs, etc.
