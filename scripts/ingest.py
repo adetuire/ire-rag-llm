@@ -1,94 +1,76 @@
-#!/usr/bin/env python3
+# scripts/ingest.py
+# scripts/ingest.py
 """
-Build a FAISS index + pickled docstore for Lilian Weng’s agent blog post.
-
+Index any local .html / .md / .txt files you drop in "data/raw/".
 Usage:  python scripts/ingest.py
+Creates:
+    • data/faiss_index.faiss
+    • data/store.pkl             
 """
 
-from __future__ import annotations
-import faiss, pickle, os, sys
-from pathlib import Path
-from typing import List
-
-import bs4
-from langchain_community.document_loaders import WebBaseLoader
+from bs4.filter import SoupStrainer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import FAISS
-from langchain_community.docstore.in_memory import InMemoryDocstore
+from langchain_huggingface import HuggingFaceEmbeddings
+from typing import List
+import pickle
 
-# Configuration
-URLS = [
-    "https://lilianweng.github.io/posts/2023-06-23-agent/"
-]  # add more URLs here if you like
+from pathlib import Path
 
-CHUNK_SIZE   = 1_000
-CHUNK_OVERLAP = 200
-EMBED_MODEL  = "sentence-transformers/all-MiniLM-L6-v2"
+RAW_DIR = Path("data/raw")
+RAW_DIR.mkdir(parents=True, exist_ok=True)
 
-FAISS_FP  = Path("data/faiss_index.faiss")
+VEC_FP = Path("data/faiss_index.faiss")
 PICKLE_FP = Path("data/store.pkl")
-FAISS_FP.parent.mkdir(parents=True, exist_ok=True)
 
-# Helpers
+EMBEDDER = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+
 def _load_documents() -> List:
-    """Download and return the blog post as a list[Document]."""
-    strainer = bs4.SoupStrainer(class_=("post-content", "post-title", "post-header"))
-    loader   = WebBaseLoader(web_paths=URLS, bs_kwargs=dict(parse_only=strainer))
-    docs = loader.load()
-    if not docs:
-        raise RuntimeError("Document download failed – check your network.")
-    return docs
+    paths = list(RAW_DIR.glob("*"))
+    if not paths:
+        raise RuntimeError(
+            f"No documents found in {RAW_DIR}. "
+            "Drop .html/.md/.txt files there first."
+        )
 
-
-def _split(docs):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP,
-        add_start_index=True,
+    loader = WebBaseLoader(
+        web_paths=[p.as_uri() for p in paths],
+        bs_kwargs=dict(parse_only=SoupStrainer()),
     )
-    return splitter.split_documents(docs)
+    return loader.load()
 
 
-def _build_vector_store(chunks):
-    embeddings = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
-    dim        = len(embeddings.embed_query("hello world"))
-    index      = faiss.IndexFlatL2(dim)
-    store      = FAISS(
-        embedding_function=embeddings,
-        index=index,
-        docstore=InMemoryDocstore(),
-        index_to_docstore_id={},
-    )
-    store.add_documents(chunks)
-    return store
-
-
-# Main
 def main() -> None:
-    print("[ingest] downloading documents…")
     docs = _load_documents()
-    print(f"[ingest] got {len(docs)=}")
 
-    print("[ingest] splitting into chunks…")
-    chunks = _split(docs)
-    print(f"[ingest] produced {len(chunks)} chunks")
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1_000, chunk_overlap=200
+    )
+    chunks = splitter.split_documents(docs)
 
-    print("[ingest] embedding + indexing…")
-    vs = _build_vector_store(chunks)
+    # tag thirds as beginning / middle / end (useful for demo query-analysis)
+    third = len(chunks) // 3
+    for i, d in enumerate(chunks):
+        if i < third:
+            d.metadata["section"] = "beginning"
+        elif i < 2 * third:
+            d.metadata["section"] = "middle"
+        else:
+            d.metadata["section"] = "end"
 
-    print(f"[ingest] saving FAISS index to {FAISS_FP}")
-    vs.save_local(str(FAISS_FP))
-    print(f"[ingest] pickling docstore to {PICKLE_FP}")
+    store = FAISS.from_documents(chunks, EMBEDDER)
+
+    VEC_FP.parent.mkdir(exist_ok=True)
+    store.save_local(str(VEC_FP))
     with PICKLE_FP.open("wb") as f:
-        pickle.dump(vs.docstore._dict, f)
+        pickle.dump(store, f)
 
-    print("[ingest] done!!!")
+    print(f"[ingest] indexed {len(chunks)} chunks → {VEC_FP}")
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        sys.exit("\nInterrupted.")
-
+    main()
