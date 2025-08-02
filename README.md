@@ -84,7 +84,7 @@ Create a .env alongside pyproject.toml.
 
 .env file in project root (ignored by git) can hold:
 
-#    "OPENAI_API_KEY=..."
-#    "GOOGLE_API_KEY=..."
+    "OPENAI_API_KEY=..."
+    "GOOGLE_API_KEY=..."
 
 .gitignore already excludes .env, .venv/, cache, data outputs, etc.
