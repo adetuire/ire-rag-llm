@@ -27,8 +27,6 @@ cd ire-rag-llm
 "pip install -e ."
 # or "pip install -r requirements.txt"
 
-
-
 # build the vector store once
 # downloads & indexes the blog post
 "python scripts/ingest.py"   
