@@ -83,7 +83,7 @@ def main() -> None:
     with PICKLE_FP.open("wb") as f:
         pickle.dump(vs.docstore._dict, f)
 
-    print("[ingest] done ✅")
+    print("[ingest] done!!!")
 
 
 if __name__ == "__main__":
