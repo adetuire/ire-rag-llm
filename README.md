@@ -58,11 +58,13 @@ run-rag --question "What is Task Decomposition?" --k 3
 
 ## Pure Retrieval CLI
 Query the FAISS index without hitting any paid API:
+    
     "run-retrieval --question "Explain task decomposition" --k 4"
 
 
 ## RAG QA CLI
 If you’ve built the FAISS index and have an API key in your environment (OpenAI or Google), you can run full RAG:
+    
     "run-rag --question "What is Task Decomposition?" --k 3"
 
 ## FastAPI Server
