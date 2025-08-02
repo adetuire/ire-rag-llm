@@ -126,9 +126,9 @@ Create a .env alongside pyproject.toml.
 
 
 ---
-Script Guide & Quick-start Cheatsheet
+### Script Guide & Quick-start Cheatsheet
 
-| Script / CLI entry-point | What it does | Needs before running | Example |
+| Script / CLI entry-point | What it does | required before running | Example |
 | ------------------------ | ------------ | ------------------- | ------- |
 | `python scripts/ingest.py` | Index **any local `.html / .md / .txt` files** in `data/raw/` into `data/faiss_index.faiss` + `data/store.pkl`. | Put files in `data/raw/` first. No API keys. | `python scripts/ingest.py` |
 | `python scripts/ingest2.py` | **One-shot downloader**: fetches Lilian Weng’s “LLM Agents” blog post, chunks it and builds `data/faiss_index_v2.faiss`. | Internet connection. No API keys. | `python scripts/ingest2.py` |
