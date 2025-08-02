@@ -135,8 +135,8 @@ Script Guide & Quick-start Cheatsheet
 | `python scripts/ingest3.py` | Same as above but uses a manual FAISS build + pickles the doc-store (`data/faiss_index_v3.faiss`, `data/store.pkl`). | Internet. No API keys. | `python scripts/ingest3.py` |
 | `python -m src.rag.chain -q "..." [--k N]` | **Pure retrieval v1** – returns the *k* nearest chunks from `faiss_index.faiss`. | Run **`ingest.py`** first. | `python -m src.rag.chain -q "Explain X" --k 3` |
 | `python -m src.rag.chain2 -q "..." [--k N]` | **Pure retrieval v2** – uses `faiss_index_v2.faiss`. | Run **`ingest2.py`** first. | `python -m src.rag.chain2 -q "Explain X"` |
-| `run-retrieval -q "..." [-k N]` | CLI wrapper for **`chain2.retrieve_v2()`** (identical output, nicer name). Installed automatically via `pip install -e .`. | Same as above. | `run-retrieval -q "Explain X" -k 5` |
-| `run-rag -q "..."` | Full **RAG pipeline** – query-analysis ➜ filtered retrieval ➜ LLM answer (LangGraph). Uses `chain_rag.py`. | 1. **`OPENAI_API_KEY` _or_ `GOOGLE_API_KEY`** in env  <br>2. `ingest.py` or `ingest3.py` done. | `export OPENAI_API_KEY=…`<br>`run-rag -q "What is Task Decomposition?"` |
+| `run-retrieval -q "..." [-k N]` | CLI wrapper for **`chain2.retrieve_v2()`** (identical output). Installed automatically via `pip install -e .`. | Same as above. | `run-retrieval -q "Explain X" -k 5` |
+| `run-rag -q "..."` | Full **RAG pipeline** – query-analysis to filtered retrieval to LLM answer (LangGraph). Uses `chain_rag.py`. | 1. **`OPENAI_API_KEY` _or_ `GOOGLE_API_KEY`** in env  <br>2. `ingest.py` or `ingest3.py` done. | `export OPENAI_API_KEY=…`<br>`run-rag -q "What is Task Decomposition?"` |
 | `uvicorn rag.app:app --reload --port 8000` | Spins up a **FastAPI** micro-service.<br>GET `/retrieve?q=<question>&k=<int>` returns JSON with top-k chunks (powered by `chain2`). | `ingest2.py` done. | `curl "http://localhost:8000/retrieve?q=Explain+X&k=3"` |
 
 ### Environment variables
