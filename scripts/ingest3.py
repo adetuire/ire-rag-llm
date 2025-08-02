@@ -26,7 +26,7 @@ CHUNK_SIZE   = 1_000
 CHUNK_OVERLAP = 200
 EMBED_MODEL  = "sentence-transformers/all-MiniLM-L6-v2"
 
-FAISS_FP  = Path("data/faiss_index.faiss")
+FAISS_FP  = Path("data/faiss_index_v3.faiss")
 PICKLE_FP = Path("data/store.pkl")
 FAISS_FP.parent.mkdir(parents=True, exist_ok=True)
 
