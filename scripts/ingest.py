@@ -1,45 +1,59 @@
 # scripts/ingest.py
-from typing import cast
-import bs4, os, pickle
-from pathlib import Path
-from langchain_community.document_loaders import WebBaseLoader
+# scripts/ingest.py
+"""
+Index any local .html / .md / .txt files you drop in "data/raw/".
+Usage:  python scripts/ingest.py
+Creates:
+    • data/faiss_index.faiss
+    • data/store.pkl             
+"""
+
+import bs4
+from bs4 import SoupStrainer
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+import pickle
+
+from pathlib import Path
 
 RAW_DIR = Path("data/raw")
-VECTOR_FP = Path("data/faiss_index.faiss")
+RAW_DIR.mkdir(parents=True, exist_ok=True)
 
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+VEC_FP = Path("data/faiss_index.faiss")
+PICKLE_FP = Path("data/store.pkl")
 
-def main() -> None:
-    if not RAW_DIR.exists():
-        RAW_DIR.mkdir(parents=True)
-        print(f"[info] put source docs in {RAW_DIR}")
-        return
+EMBEDDER = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
+
+def _load_documents() -> List:
     paths = list(RAW_DIR.glob("*"))
     if not paths:
-        print(f"[warn] no documents found in {RAW_DIR}")
-        return
+        raise RuntimeError(
+            f"No documents found in {RAW_DIR}. "
+            "Drop .html/.md/.txt files there first."
+        )
 
-    # load & chunk
-    loader = WebBaseLoader(web_paths=[p.as_uri() for p in paths],
-                           bs_kwargs=dict(parse_only=bs4.SoupStrainer()))
-    docs = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    loader = WebBaseLoader(
+        web_paths=[p.as_uri() for p in paths],
+        bs_kwargs=dict(parse_only=SoupStrainer()),
+    )
+    return loader.load()
+
+
+def main() -> None:
+    docs = _load_documents()
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1_000, chunk_overlap=200
+    )
     chunks = splitter.split_documents(docs)
 
-    # 1/3 tagged "beginning", next third "middle", last third "end"
-    total = len(chunks)
-    third = total // 3
-
-    from typing import Any, cast
-
-    doc = cast(dict[str, Any], d.metadata)
-    doc["section"] = "end"
-
-
+    # tag thirds as beginning / middle / end (useful for demo query-analysis)
+    third = len(chunks) // 3
     for i, d in enumerate(chunks):
         if i < third:
             d.metadata["section"] = "beginning"
@@ -48,11 +62,15 @@ def main() -> None:
         else:
             d.metadata["section"] = "end"
 
-    # build in-memory store
-    store = FAISS.from_documents(chunks, embeddings)
-    store.save_local(str(VECTOR_FP))
-    import pickle
-    with open("data/store.pkl", "wb") as f:
+    store = FAISS.from_documents(chunks, EMBEDDER)
+
+    VEC_FP.parent.mkdir(exist_ok=True)
+    store.save_local(str(VEC_FP))
+    with PICKLE_FP.open("wb") as f:
         pickle.dump(store, f)
 
-    print(f"built index with {len(chunks)} chunks → {VECTOR_FP}")
+    print(f"[ingest] indexed {len(chunks)} chunks → {VEC_FP}")
+
+
+if __name__ == "__main__":
+    main()

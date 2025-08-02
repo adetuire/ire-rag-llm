@@ -16,7 +16,7 @@ Supports:
 cd ire-rag-llm
 
 # create virtualenv
-"python -m venv .venv || python3 -m venv .venv"
+"python -m venv .venv" # or python3 -m venv .venv
 # Windows: 
 ".venv\Scripts\activate"
 # macOS/Linux: 
@@ -32,7 +32,7 @@ cd ire-rag-llm
 "python scripts/ingest.py"   
 
 # ask something
-run-rag -q "What does the end of the post say about Task Decomposition?"
+run-rag --question "What is Task Decomposition?" --k 3
 
 # exit the virtual environment
 "(.venv) $ deactivate"
@@ -67,13 +67,17 @@ If you’ve built the FAISS index and have an API key in your environment (OpenA
 
 ## FastAPI Server
 Start a local server (defaults to port 8000):
-    "uvicorn src.rag.app:app --reload --port 8000"
+    "uvicorn rag.app:app --reload --port 8000"
+    # GET /retrieve?question=&k= – top-k chunks
+
+    # POST /rag {"question": "...", "k": 4} – RAG answer
 
 Endpoints
     GET /retrieve?question=...&k=... -> returns top-k chunks
     POST /rag with JSON {"question": "...", "k": 3} -> returns RAG answer
 
 ## Configuration
+Create a .env alongside pyproject.toml.
 .env file in project root (ignored by git) can hold:
     "OPENAI_API_KEY=..."
     "GOOGLE_API_KEY=..."

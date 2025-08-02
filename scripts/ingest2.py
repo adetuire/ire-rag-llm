@@ -1,6 +1,8 @@
 # scripts/ingest2.py
 """
-V2 ingest: uses the new HuggingFaceEmbeddings class.
+A minimal one-shot ingester that downloads Lilian Weng’s agent post,
+chunks it and builds a FAISS v2 index.
+
 Run once:
     python scripts/ingest2.py
 """
@@ -10,11 +12,13 @@ import os
 from pathlib import Path
 
 # NEW import from langchain_huggingface
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import WebBaseLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+import bs4
 from dotenv import load_dotenv
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+from typing import List
 load_dotenv()   # loads your .env into os.environ
 
 # suppress the Windows symlink warning 
@@ -24,8 +28,8 @@ os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 os.environ.setdefault("USER_AGENT", "ire-rag-llm/0.1 (github.com/adetuire)")
 
 # index location 
-INDEX_PATH = Path("data/faiss_index_v2.faiss")
-INDEX_PATH.parent.mkdir(exist_ok=True)
+INDEX_FP = Path("data/faiss_index_v2.faiss")
+INDEX_FP.parent.mkdir(exist_ok=True)
 
 # Download & parse the blog post
 loader = WebBaseLoader(
@@ -47,5 +51,5 @@ embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-
 store      = FAISS.from_documents(chunks, embeddings)
 
 # Persist
-store.save_local(str(INDEX_PATH))
-print(f"[v2] FAISS index with {len(chunks)} chunks to {INDEX_PATH}")
+store.save_local(str(INDEX_FP))
+print(f"[v2] FAISS index with {len(chunks)} chunks to {INDEX_FP}")
