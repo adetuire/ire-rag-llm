@@ -35,7 +35,7 @@ cd ire-rag-llm
 run-rag --question "What is Task Decomposition?" --k 3
 
 # exit the virtual environment
-"(.venv) $ deactivate"
+(.venv) $ deactivate
 
 
 ```
