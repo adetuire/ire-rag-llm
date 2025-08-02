@@ -63,14 +63,17 @@ run-rag --question "What is Task Decomposition?" --k 3
     
     This will:
 
-        Asuume you have dropped a .html/.md/.txt file in data/raw/ or you have ran another version of ingest that populates that folder with the needed files. If the folder is empty it raises the "No documents found"
+        Asuume you have dropped a .html/.md/.txt file in data/raw/ 
+        
+        or you have ran another version of ingest that populates that folder with the needed files. 
+        
+        If the folder is empty it raises the "No documents found"
 
 4.  Run the ingester with "python scripts/ingest3.py"
     
     This will:
 
-        pull Lilian Weng’s “LLM-Powered Autonomous Agents” blog post directly from the
-        web (no files needed in data/raw/);
+        pull Lilian Weng’s “LLM-Powered Autonomous Agents” blog post directly from the web (no files needed in data/raw/);
 
         chunks it, embeds with Sentence-Transformers (all-MiniLM-L6-v2), and saves:
 
