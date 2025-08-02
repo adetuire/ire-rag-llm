@@ -63,7 +63,7 @@ run-rag --question "What is Task Decomposition?" --k 3
     
     This will:
 
-        Asuume you have dropped a .html/.md/.txt file in data/raw/ or you have ran anothe version of ingest that populates that folder with the needed files. If the folder is empty it raises the "No documents found"
+        Asuume you have dropped a .html/.md/.txt file in data/raw/ or you have ran another version of ingest that populates that folder with the needed files. If the folder is empty it raises the "No documents found"
 
 4.  Run the ingester with "python scripts/ingest3.py"
     
