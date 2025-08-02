@@ -1,23 +1,16 @@
-# src/rag/tools.py
 from langchain_core.tools import tool
+from src.rag.vector import vector_store
+
 
 @tool(response_format="content_and_artifact")
 def retrieve(query: str):
-    """Retrieve top-2 docs relevant to `query`."""
-    from .vector import vector_store          # reuse from Part 1
-    docs = vector_store.similarity_search(query, k=2)
-    serialized = "\n\n".join(
-        f"Source: {d.metadata}\nContent: {d.page_content}"
+    """
+    Retrieve the top-2 chunks from Lilian Weng’s blog post that
+    best match query.
+    """
+    docs = vector_store().similarity_search(query, k=2)
+    text = "\n\n".join(
+        f"Source: {d.metadata.get('source', 'blog')}\nContent: {d.page_content}"
         for d in docs
     )
-    return serialized, docs
-
-@tool(response_format="content_and_artifact")
-def retrieve_v2(query: str, k: int = 4):
-    """Retrieve top-k docs relevant to `query`."""
-    from .chain2 import retrieve_v2          # reuse from Part 2
-    docs = retrieve_v2(query, k)
-    serialized = "\n\n".join(
-        f"Content: {d}" for d in docs
-    )
-    return serialized, docs
+    return text, docs

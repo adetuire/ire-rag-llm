@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-app = FastAPI()
+from src.rag.conversational_chain import chat_rag
+
+app = FastAPI(title="Conversational RAG Demo")
 
 class ChatRequest(BaseModel):
     history: list[dict]   # [{'role':'user','content':'...'}, ...]

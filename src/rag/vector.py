@@ -1,14 +1,24 @@
 from functools import lru_cache
 from pathlib import Path
+
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_openai.embeddings import OpenAIEmbeddings
+
 
 @lru_cache(maxsize=1)
 def vector_store():
-    """Return a singleton FAISS retriever (blog post)."""
-    dir_ = Path(__file__).parent.parent.parent / "data/faiss_blog"
-    return FAISS.load_local(
-        dir_,
-        OpenAIEmbeddings(model="text-embedding-3-small"),
-        allow_dangerous_deserialization=True,
-    ).as_retriever(search_kwargs={"k": 2})
+    """
+    Return a singleton FAISS retriever for the blog-post vectors.
+    """
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    faiss_dir = repo_root / "data" / "faiss_blog"
+
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
+    store = FAISS.load_local(
+        faiss_dir,
+        embeddings,
+        allow_dangerous_deserialization=True,            # LC ≥0.3 safeguard
+    )
+    return store.as_retriever(search_kwargs={"k": 2})

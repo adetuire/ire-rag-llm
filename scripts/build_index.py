@@ -1,18 +1,30 @@
 """
-Run once to create vectors for Lilian Weng's RAG blog post.
-  python scripts/build_index.py
+Create a FAISS index for Lilian Weng’s RAG blog post.
+Run once:  python scripts/build_index.py
 """
-
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()                     
+
 from langchain_community.document_loaders import WebBaseLoader
-from langchain_openai.embeddings import OpenAIEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 URL = "https://lilianweng.github.io/posts/2023-06-15-agent/"
-OUT_DIR = Path("data/faiss_blog")           # git-ignored via .gitignore
+OUT_DIR = Path("data/faiss_blog")
 
-docs = WebBaseLoader(URL).load()
-emb = OpenAIEmbeddings(model="text-embedding-3-small")
-faiss = FAISS.from_documents(docs, emb)
-faiss.save_local(OUT_DIR)
-print("Saved FAISS index to", OUT_DIR)
+
+def main() -> None:
+    docs = WebBaseLoader(URL).load()
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
+    vs = FAISS.from_documents(docs, embeddings)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    vs.save_local(OUT_DIR)
+    print(f"Saved FAISS index to {OUT_DIR.resolve()}")
+
+
+if __name__ == "__main__":
+    main()
