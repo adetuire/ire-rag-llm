@@ -1,8 +1,14 @@
-from fastapi import FastAPI, Query
-from src.rag.chain2 import retrieve_v2
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-app = FastAPI(title="RAG Retrieval API")
+app = FastAPI()
 
-@app.get("/retrieve")
-def retrieve(q: str = Query(..., description="Your question"), k: int = 4):
-    return {"chunks": retrieve_v2(q, k)}
+class ChatRequest(BaseModel):
+    history: list[dict]   # [{'role':'user','content':'...'}, ...]
+    message: str
+
+@app.post("/chat")
+def chat(req: ChatRequest):
+    state = {"messages": req.history + [{"role":"user","content":req.message}]}
+    result = chat_rag.invoke(state)
+    return {"answer": result["messages"][-1].content}
