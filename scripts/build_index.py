@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()                     
 
 from langchain_community.document_loaders import WebBaseLoader
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 URL = "https://lilianweng.github.io/posts/2023-06-15-agent/"

@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 

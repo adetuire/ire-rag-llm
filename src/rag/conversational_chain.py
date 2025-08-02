@@ -11,7 +11,7 @@ llm = ChatOllama(model="mistral:7b", temperature=0.2)
 
 # let the LLM decide to answer or call the tool
 def query_or_respond(state: MessagesState):
-    llm_with_tools = llm.bind_tools([retrieve])
+    llm_with_tools = llm.bind_tools([retrieve], SystemMessage("You are a helpful assistant. Greet briefly unless the user asks a question."))
     response = llm_with_tools.invoke(state["messages"])
     return {"messages": [response]}
 
@@ -22,9 +22,7 @@ tools = ToolNode([retrieve])
 
 # Step 3 — craft the final answer using any retrieved context 
 def generate(state: MessagesState):
-    context_blocks = [message.content for message in state["messages"] if message.type == "tool"]
-    if not context_blocks:
-        return {"messages": ["No relevant context found."]}
+    tool_blocks = [message.content for message in state["messages"] if message.type == "tool"]
 
     system_message_content = (
         "You are an assistant for question-answering tasks. "
@@ -33,7 +31,7 @@ def generate(state: MessagesState):
         "don't know. Use three sentences maximum and keep the "
         "answer concise."
         "\n\n"
-        + "\n\n".join(context_blocks)
+        + "\n\n".join(tool_blocks)
     )
 
     conversation_messages = [
@@ -52,9 +50,9 @@ graph.add_node(query_or_respond)
 graph.add_node(tools, name="tools")
 graph.add_node(generate)
 
-graph.set_entry_point("generate_ai_message")
+graph.set_entry_point("query_or_respond")
 graph.add_conditional_edges(
-    "generate_ai_message", tools_condition, {END: END, "tools": "tools"}
+    "query_or_respond", tools_condition, {END: END, "tools": "tools"}
 )
 graph.add_edge("tools", "generate")
 graph.add_edge("generate", END)
