@@ -11,7 +11,7 @@ llm = ChatOllama(model="mistral:7b", temperature=0.2)
 
 # let the LLM decide to answer or call the tool
 def query_or_respond(state: MessagesState):
-    llm_with_tools = llm.bind_tools([retrieve], SystemMessage("You are a helpful assistant. Greet briefly unless the user asks a question."))
+    llm_with_tools = llm.bind_tools([retrieve], system_message="You are a helpful assistant. Greet briefly unless the user asks a question.")
     response = llm_with_tools.invoke(state["messages"])
     return {"messages": [response]}
 
