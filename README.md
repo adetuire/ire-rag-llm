@@ -1,7 +1,7 @@
 # IRE-RAG-LLM
 ##  Version 1.1.0 — Conversational RAG (LangGraph)
 
-| Feature | v1 (single-turn) | **v2 (this release)** |
+| Feature | v1.0.0 (single-turn) | v1.1.0 (this release) |
 |---------|------------------|-----------------------|
 | Retrieval store | FAISS index of Lilian Weng blog | same index  |
 | LLM | any OpenAI / Gemini | **Local Ollama (default `mistral:7b`)** |
@@ -39,7 +39,7 @@ uvicorn src.rag.app:app --reload --port 8000
 
         "llm = ChatOllama(model="llama3:8b-instruct-q4_K_M", temperature=0.2)"
 
-## V1 code
+## V1.0.0 README below
     Legacy single-turn RAG scripts now live in src/rag/legacy/; the main package contains only the v2 conversational pipeline.
 
 ### V1.0.0
