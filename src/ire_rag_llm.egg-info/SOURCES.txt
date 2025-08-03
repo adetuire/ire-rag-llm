@@ -9,6 +9,7 @@ src/ire_rag_llm.egg-info/requires.txt
 src/ire_rag_llm.egg-info/top_level.txt
 src/rag/__init__.py
 src/rag/app.py
+src/rag/chat_cli.py
 src/rag/conversational_chain.py
 src/rag/tools.py
 src/rag/vector.py
