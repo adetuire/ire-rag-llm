@@ -3,7 +3,7 @@
 
 | Feature | v1 (single-turn) | **v2 (this release)** |
 |---------|------------------|-----------------------|
-| Retrieval store | FAISS index of Lilian Weng blog | **same index ** |
+| Retrieval store | FAISS index of Lilian Weng blog | same index  |
 | LLM | any OpenAI / Gemini | **Local Ollama (default `mistral:7b`)** |
 | Memory | none | **Conversational context** via LangGraph |
 | API | GET `/retrieve` | **POST `/chat`** (multi-turn) |
