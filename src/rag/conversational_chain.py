@@ -6,12 +6,13 @@ from langchain_core.messages import SystemMessage
 from rag.tools import retrieve
 
 # Local LLM served by Ollama free
+# Change the model tag if you want to pull something else
 llm = ChatOllama(model="mistral:7b", temperature=0.2)
 
 
 # let the LLM decide to answer or call the tool
 def query_or_respond(state: MessagesState):
-    llm_with_tools = llm.bind_tools([retrieve], system_message="You are a helpful assistant. Greet briefly unless the user asks a question.")
+    llm_with_tools = llm.bind_tools([retrieve])
     response = llm_with_tools.invoke(state["messages"])
     return {"messages": [response]}
 
@@ -46,9 +47,9 @@ def generate(state: MessagesState):
 
 # Build the LangGraph exactly like the tutorial
 graph = StateGraph(MessagesState)
-graph.add_node(query_or_respond)
-graph.add_node(tools, name="tools")
-graph.add_node(generate)
+graph.add_node(query_or_respond)    # entry node
+graph.add_node(tools, name="tools") # retrieval node
+graph.add_node(generate)    # generation node
 
 graph.set_entry_point("query_or_respond")
 graph.add_conditional_edges(
