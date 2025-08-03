@@ -10,7 +10,6 @@ def retrieve(query: str):
     """
     docs = vector_store().similarity_search(query, k=2)
     text = "\n\n".join(
-        f"Source: {d.metadata.get('source', 'blog')}\nContent: {d.page_content}"
-        for d in docs
+        f"Source: {d.metadata}\nContent: {d.page_content}" for d in docs
     )
     return text, docs

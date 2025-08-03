@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 
@@ -21,4 +21,4 @@ def vector_store():
         embeddings,
         allow_dangerous_deserialization=True,            # LC ≥0.3 safeguard
     )
-    return store.as_retriever(search_kwargs={"k": 2})
+    return store
