@@ -39,6 +39,62 @@ uvicorn src.rag.app:app --reload --port 8000
 
         "llm = ChatOllama(model="llama3:8b-instruct-q4_K_M", temperature=0.2)"
 
+```bash
+## Offline Run(hf + ollama)
+
+    "No cloud keys, no OpenAI fees, everything happens on your laptop."
+
+### 1.  Install the extra wheels
+
+    pip install -U langchain-ollama langchain-huggingface ollama
+
+### 2. use a tools-enabled model based on your memory size
+
+    ollama pull mistral:7b-instruct
+
+### 3. Build the FAISS index once
+
+    python scripts/build_index.py
+ 
+```
+    This downloads Lilian Weng’s RAG blog post, chunks it, embeds with the free
+    
+    sentence-transformers/all-MiniLM-L6-v2 model and writes
+    
+    data/faiss_blog/.
+
+```bash
+### 4. Start the lacal ollama
+
+    ollama serve &   # keep running in a seperate tab
+    uvicorn src.rag.app:app - reload --port 8000
+
+### 5. Now you can use it
+    # one-off curl
+    curl -X POST http://localhost:8000/chat \
+    
+         -H "Content-Type: application/json" \
+    
+         -d '{"history": [], "message": "Hi 👋"}'
+
+    # two-turn example
+    curl -X POST http://localhost:8000/chat \
+        
+         -H "Content-Type: application/json" \
+        
+         -d '{"history": [{"role":"user","content":"Hi"}, {"role":"assistant","content":"Hello! How can I help?"}], "message": "What is task decomposition?"}'
+
+```
+
+    Ollama streams the tokens in the terminal running uvicorn;  
+    
+    curl returns a compact JSON answer:
+```bash
+    {
+        "answer": "Task decomposition means breaking a complex objective into smaller actions so an autonomous agent can solve each one in turn..."
+    }
+```
+
 ## V1.0.0 README below
     Legacy single-turn RAG scripts now live in src/rag/legacy/; the main package contains only the v2 conversational pipeline.
 
