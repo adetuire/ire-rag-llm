@@ -1,4 +1,48 @@
 # IRE-RAG-LLM
+##  Version 2 — Conversational RAG (LangGraph)
+
+| Feature | v1 (single-turn) | **v2 (this release)** |
+|---------|------------------|-----------------------|
+| Retrieval store | FAISS index of Lilian Weng blog | same index  |
+| LLM | any OpenAI / Gemini | **Local Ollama (default `mistral:7b`)** |
+| Memory | none | **Conversational context** via LangGraph |
+| API | GET `/retrieve` | **POST `/chat`** (multi-turn) |
+
+### Quick start
+
+```bash
+git clone ...
+cd ire-rag-llm
+python -m venv .venv && source .venv/Scripts/activate  # Win: Activate
+
+pip install -e .            # installs v2 deps
+python scripts/build_index.py   # one-time: downloads & indexes the blog post
+
+ollama serve &               # make sure Mistral-7B is pulled
+uvicorn src.rag.app:app --reload --port 8000
+```
+
+## Then:
+
+    curl -X POST http://localhost:8000/chat \
+         
+         -H "Content-Type: application/json" \
+         
+         -d '{"history": [], "message": "What is task decomposition?"}'
+
+## RAM note
+    mistral:7b needs >=4.2 GiB free.
+    
+    If that’s tight, pull llama3:8b-instruct-q4_K_M (you need a model that has tools-enabled) and
+    
+    change one line in src/rag/conversational_chain.py:
+
+        "llm = ChatOllama(model="llama3:8b-instruct-q4_K_M", temperature=0.2)"
+
+## V1 code
+    Legacy single-turn RAG scripts now live in src/rag/legacy/; the main package contains only the v2 conversational pipeline.
+
+### V1
 
 A local Retrieval-Augmented Generation (RAG) demo using FAISS + HuggingFace embeddings (free) and an optional LLM-API pipeline.  
 Supports:
@@ -8,7 +52,6 @@ Supports:
 - FastAPI -> REST endpoint at `GET /qa?question=...&k=...`
 
 ---
-
 ## Install
 
 ```bash
@@ -18,7 +61,7 @@ cd ire-rag-llm
 # create virtualenv
 "python -m venv .venv" # or python3 -m venv .venv
 # Windows: 
-".venv\Scripts\activate"
+"source .venv/Scripts/activate"
 # macOS/Linux: 
 "source .venv/bin/activate"
 
