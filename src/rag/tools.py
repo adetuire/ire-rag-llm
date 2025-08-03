@@ -1,5 +1,5 @@
 from langchain_core.tools import tool
-from src.rag.vector import vector_store
+from rag.vector import vector_store
 
 
 @tool(response_format="content_and_artifact")
