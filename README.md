@@ -1,7 +1,7 @@
 # IRE-RAG-LLM
-##  Version 1.1.0 — Conversational RAG (LangGraph)
+##  Version 1.1.1 — Conversational RAG (LangGraph)
 
-| Feature | v1.0.0 (single-turn) | v1.1.0 (this release) |
+| Feature | v1.0.0 (single-turn) | v1.1.1 |
 |---------|------------------|-----------------------|
 | Retrieval store | FAISS index of Lilian Weng blog | same index  |
 | LLM | any OpenAI / Gemini | **Local Ollama (default `mistral:7b`)** |
