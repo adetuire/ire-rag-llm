@@ -7,7 +7,7 @@ from rag.tools import retrieve
 
 # Local LLM served by Ollama free
 # Change the model tag if you want to pull something else
-llm = ChatOllama(model="mistral:7b", temperature=0.2)
+llm = ChatOllama(model="mistral:7b-instruct-q2_K", temperature=0.2)
 
 
 # let the LLM decide to answer or call the tool
