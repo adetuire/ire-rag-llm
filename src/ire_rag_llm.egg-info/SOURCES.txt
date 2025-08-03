@@ -9,11 +9,12 @@ src/ire_rag_llm.egg-info/requires.txt
 src/ire_rag_llm.egg-info/top_level.txt
 src/rag/__init__.py
 src/rag/app.py
-src/rag/chain.py
-src/rag/chain2.py
-src/rag/chain_rag.py
 src/rag/conversational_chain.py
-src/rag/run_rag.py
-src/rag/run_retrieval.py
 src/rag/tools.py
 src/rag/vector.py
+src/rag/legacy/__init__.py
+src/rag/legacy/chain.py
+src/rag/legacy/chain2.py
+src/rag/legacy/chain_rag.py
+src/rag/legacy/run_rag.py
+src/rag/legacy/run_retrieval.py
