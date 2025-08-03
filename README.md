@@ -1,5 +1,5 @@
 # IRE-RAG-LLM
-##  Version 2 — Conversational RAG (LangGraph)
+##  Version 1.1.0 — Conversational RAG (LangGraph)
 
 | Feature | v1 (single-turn) | **v2 (this release)** |
 |---------|------------------|-----------------------|
@@ -42,7 +42,7 @@ uvicorn src.rag.app:app --reload --port 8000
 ## V1 code
     Legacy single-turn RAG scripts now live in src/rag/legacy/; the main package contains only the v2 conversational pipeline.
 
-### V1
+### V1.0.0
 
 A local Retrieval-Augmented Generation (RAG) demo using FAISS + HuggingFace embeddings (free) and an optional LLM-API pipeline.  
 Supports:
