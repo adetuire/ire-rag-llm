@@ -35,3 +35,4 @@ where = ["src"]
 [project.scripts]
 run-retrieval = "rag.run_retrieval:main"
 run-rag       = "rag.run_rag:main"
+rag-chat      = "rag.chat_cli:chat"
