@@ -14,7 +14,7 @@ history: list[dict] = []          # running dialogue
 
 @app.command()
 def chat():
-    typer.echo("🗨️  Conversational RAG (Ctrl-D to quit)")
+    typer.echo("Conversational RAG (Ctrl-C to quit)")
     try:
         while True:
             user = input("you ▸ ").strip()
@@ -29,7 +29,7 @@ def chat():
 
             history.append({"role": "assistant", "content": assistant})
     except (EOFError, KeyboardInterrupt):
-        typer.echo("\nbye! 👋")
+        typer.echo("\nbye!!!")
 
 
 if __name__ == "__main__":
