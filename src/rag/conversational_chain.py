@@ -4,7 +4,10 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_core.messages import SystemMessage
 
 from rag.tools import retrieve
-
+import os
+from langchain_core.messages import ToolMessage
+USE_TOOLS = os.getenv("RAG_USE_TOOLS", "1") == "1"
+# If RAG_USE_TOOLS is set to 0, we will not use the tool
 # Local LLM served by Ollama free
 # Change the model tag if you want to pull something else
 llm = ChatOllama(model="mistral:7b", temperature=0.2)
@@ -12,10 +15,19 @@ llm = ChatOllama(model="mistral:7b", temperature=0.2)
 
 # let the LLM decide to answer or call the tool
 def query_or_respond(state: MessagesState):
-    llm_with_tools = llm.bind_tools([retrieve])
-    response = llm_with_tools.invoke(state["messages"])
-    return {"messages": [response]}
-
+    if USE_TOOLS:
+        llm_with_tools = llm.bind_tools([retrieve])
+        response = llm_with_tools.invoke(state["messages"])
+        return {"messages": [response]}
+    
+    user_message = state["messages"][-1]
+    tool_text, _ = retrieve.invoke(user_message.content)
+    return {"messages": [
+        ToolMessage(
+            content=tool_text,
+            name="retrieve",
+            tool_call_id="manual")]
+    }
 
 # if a tool was requested, execute it 
 tools = ToolNode([retrieve])

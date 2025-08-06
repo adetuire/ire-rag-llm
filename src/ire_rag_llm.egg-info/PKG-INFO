@@ -22,9 +22,9 @@ Requires-Dist: faiss-cpu>=1.11.0
 Requires-Dist: torch>=2.2
 
 # IRE-RAG-LLM
-##  Version 1.1.0 — Conversational RAG (LangGraph)
+##  Version 1.1.1 — Conversational RAG (LangGraph)
 
-| Feature | v1.0.0 (single-turn) | v1.1.0 (this release) |
+| Feature | v1.0.0 (single-turn) | v1.1.1 |
 |---------|------------------|-----------------------|
 | Retrieval store | FAISS index of Lilian Weng blog | same index  |
 | LLM | any OpenAI / Gemini | **Local Ollama (default `mistral:7b`)** |
@@ -62,23 +62,22 @@ uvicorn src.rag.app:app --reload --port 8000
 
         "llm = ChatOllama(model="llama3:8b-instruct-q4_K_M", temperature=0.2)"
 
-```bash
 ## Offline Run(hf + ollama)
-
+```bash
     "No cloud keys, no OpenAI fees, everything happens on your laptop."
-
-### 1.  Install the extra wheels
-
+```
+## 1.  Install the extra wheels
+```bash
     pip install -U langchain-ollama langchain-huggingface ollama
-
-### 2. use a tools-enabled model based on your memory size
-
+```
+## 2. use a tools-enabled model based on your memory size
+```bash
     ollama pull mistral:7b-instruct
-
-### 3. Build the FAISS index once
-
+```
+## 3. Build the FAISS index once
+```bash
     python scripts/build_index.py
- 
+
 ```
     This downloads Lilian Weng’s RAG blog post, chunks it, embeds with the free
     
@@ -86,13 +85,13 @@ uvicorn src.rag.app:app --reload --port 8000
     
     data/faiss_blog/.
 
+## 4. Start the lacal ollama
 ```bash
-### 4. Start the lacal ollama
-
     ollama serve &   # keep running in a seperate tab
     uvicorn src.rag.app:app - reload --port 8000
-
-### 5. Now you can use it
+```
+## 5. Now you can use it
+```bash
     # one-off curl
     curl -X POST http://localhost:8000/chat \
     
@@ -106,9 +105,7 @@ uvicorn src.rag.app:app --reload --port 8000
          -H "Content-Type: application/json" \
         
          -d '{"history": [{"role":"user","content":"Hi"}, {"role":"assistant","content":"Hello! How can I help?"}], "message": "What is task decomposition?"}'
-
 ```
-
     Ollama streams the tokens in the terminal running uvicorn;  
     
     curl returns a compact JSON answer:
@@ -116,6 +113,32 @@ uvicorn src.rag.app:app --reload --port 8000
     {
         "answer": "Task decomposition means breaking a complex objective into smaller actions so an autonomous agent can solve each one in turn..."
     }
+```
+
+---
+
+## Command-line chat
+
+If you prefer a zero-network terminal chat, use the built-in CLI.
+
+### Run
+
+```bash
+    python src/rag/chat_cli.py
+
+    After running: "pip install -e ."
+
+    run: rag-chat
+```
+
+## Example of a session
+```bash
+        Conversational RAG (Ctrl-C to quit)
+    you ▸ Hi
+    rag ▸ Hello! How can I help?
+
+    you ▸ What is task decomposition?
+    rag ▸ Task decomposition is the practice of breaking a complex goal …
 ```
 
 ## V1.0.0 README below
