@@ -1,6 +1,183 @@
 # IRE-RAG-LLM
-##  Version 1.1.1 — Conversational RAG (LangGraph)
+##  Version 1.2.0 — Conversational RAG (LangGraph + local Ollama + FAISS)
 
+This repo contains a **conversational** RAG pipeline (v1.2) and **legacy single-turn** RAG (v1).  
+v2 runs fully local by default: **Ollama** for the LLM and **Hugging Face sentence-transformers** for embeddings.
+
+---
+
+## What’s in v2?
+
+| Area | v2 (1.1.1) |
+|---|---|
+| LLM | Local **Ollama** (`mistral:7b` by default) |
+| Retrieval store | FAISS (Hugging Face `all-MiniLM-L6-v2`) |
+| Chat orchestration | **LangGraph** with optional tool-calling |
+| API | **FastAPI** `POST /chat` |
+| CLI | `rag-chat` terminal chat (zero network) |
+| Extras | **Ambiguity clarification** (e.g., “who is ada?” -> show candidates) |
+| Config flags | `RAG_USE_TOOLS`, `RAG_INDEX_DIR` |
+
+**Ambiguity clarification**: if a user asks a short, ambiguous query (e.g., `who is ada?`), the graph first **retrieves top candidates** and asks you to choose instead of guessing.  
+Set `RAG_USE_TOOLS=0` to disable tool-based retrieval and fall back to plain prompting.
+
+---
+
+## Repo layout (v1.2.0)
+
+# scripts/
+    wiki_extract.py # optional: extract wiki dump -> txt files
+    
+    build_index.py # build FAISS from a folder of txt files
+
+# src/rag/
+    app.py # FastAPI app (POST /chat)
+    
+    chat_cli.py # terminal chat CLI (rag-chat)
+    
+    conversational_chain.py# LangGraph: query→tools→generate
+    
+    tools.py # @tool retrieve(...) for LangGraph
+    
+    vector.py # FAISS + HF embeddings (cached)
+
+# data/
+    faiss_blog/ # sample index (blog)
+    
+    faiss_wiki/ # optional wiki index (if you build it)
+    
+    wiki_docs/ # optional extracted wiki pages (txt)
+
+---
+
+## Install
+
+```bash
+git clone https://github.com/adetuire/ire-rag-llm.git
+cd ire-rag-llm
+python -m venv .venv
+# Windows (Git Bash):
+source .venv/Scripts/activate
+# macOS/Linux:
+# source .venv/bin/activate
+
+pip install -e .
+```
+
+## Build a FAISS index (choose ONE)
+# A. Demo blog (quickest)
+
+    Builds a small FAISS index from Lilian Weng’s blog.
+
+```bash
+python scripts/build_index.py  # writes to data/faiss_blog/
+export RAG_INDEX_DIR=data/faiss_blog        # (Git Bash / Linux / macOS)
+# PowerShell: $env:RAG_INDEX_DIR="data/faiss_blog"
+```
+
+# B. Wikipedia (offline, local)
+
+    1. Download Simple English wiki dump (≈ 300 MB):
+
+```bash
+mkdir -p dumps
+curl -L -o dumps/simplewiki-latest-pages-articles.xml.bz2 \
+  https://dumps.wikimedia.org/simplewiki/latest/simplewiki-latest-pages-articles.xml.bz2
+```
+
+    2. Extract a subset to txt files:
+
+```bash
+python scripts/wiki_extract.py \
+  --dump dumps/simplewiki-latest-pages-articles.xml.bz2 \
+  --out data/wiki_docs \
+  --limit 20000
+```
+
+    3. Index the extracted packages
+
+```bash
+python scripts/build_index.py --docs data/wiki_docs --out data/faiss_wiki
+export RAG_INDEX_DIR=data/faiss_wiki
+# PowerShell: $env:RAG_INDEX_DIR="data/faiss_wiki"
+```
+
+    Embeddings: free, CPU-only (sentence-transformers/all-MiniLM-L6-v2).
+    
+    Files are stored under data/….
+
+## Run locally
+# Option 1 - API server
+
+    1. Start Ollama and ensure a tools-capable model is available
+
+```bash
+ollama serve   # keep it running
+ollama pull mistral:7b      # default in code; needs ~4–5 GiB free RAM
+```
+
+    2. Run the API
+
+```bash
+uvicorn src.rag.app:app --reload --port 8000
+```
+
+    3. Call the endpoint
+
+        a. Git Bash / macOS / Linux (curl):
+
+```bash
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"history": [], "message": "Explain reflection in autonomous agents."}'
+```
+
+        b. Windows PowerShell:
+
+```bash
+curl -X POST http://127.0.0.1:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"history": [], "message": "Explain reflection in autonomous agents."}'
+```
+
+# Option 2 - Terminal chat (CLI)
+```bash
+rag-chat
+# or: python src/rag/chat_cli.py
+```
+
+    Example:
+
+```bash
+Conversational RAG (Ctrl-C to quit)
+you ▸ who is ada?
+rag ▸ Your question is ambiguous. Did you mean one of these?
+- Lawrence Higby
+- Adana massacre
+- ...
+you ▸ Ada Lovelace
+rag ▸ Ada Lovelace (1815–1852) …
+```
+
+## Configuration
+| Variable | What it does	 | Git Bash / macOS / Linux	 | PowerShell |
+|---------|------------------|-----------------------|--------------------|
+| **RAG_INDEX_DIR**	 | Path to an existing FAISS index directory | **export RAG_INDEX_DIR=data/faiss_wiki**  | **$env:RAG_INDEX_DIR="data/faiss_wiki"** |
+| **RAG_USE_TOOLS** | **1** = let the model call the **retrieve** tool; **0** = disable tool calls | **export RAG_USE_TOOLS=1** | **$env:RAG_USE_TOOLS="1"** |
+| **OLLAMA_HOST** | custom Ollama host | **export OLLAMA_HOST=http://localhost:1143** | **$env:OLLAMA_HOST="http://localhost:11434"** |
+
+
+## Troubleshooting
+| Error message                                                         | Likely cause                                      | Fix (Git Bash / macOS / Linux)                                                                              | Fix (PowerShell)                                                                   |
+| --------------------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `… does not support tools (status 400)`                               | Model doesn’t support tool calls                  | **`export RAG_USE_TOOLS=0`** (or use a tools-capable instruct model)                                        | **`$env:RAG_USE_TOOLS="0"`**                                                       |
+| `model requires more system memory (X GiB) than is available (Y GiB)` | Model too large for RAM                           | Pull a smaller/quantized model (e.g., **`ollama pull mistral:7b-instruct-q4_K_M`**), close apps, or add RAM | Same as Bash                                                                       |
+| `functools._lru_cache_wrapper has no attribute 'as_retriever'`        | Calling the cached function instead of its return | Ensure you call **`vector_store()`** (not `vector_store`); update to latest code                            | Same as Bash                                                                       |
+| `FutureWarning: encoder_attention_mask`                               | HF transformers deprecation notice                | Safe to ignore (or upgrade transformers)                                                                    | Safe to ignore                                                                     |
+| PowerShell `curl` → `Internal Server Error`                           | PS `curl` is an alias to `Invoke-WebRequest`      | Use Git Bash `curl`                                                                                         | Use **`Invoke-WebRequest`** or **`curl.exe`** explicitly                           |
+| `Error: listen tcp 127.0.0.1:11234: bind: … in use`                   | Another Ollama is running on 11234(example)                | **`pkill ollama`** (or restart the Ollama service)                                                          | **`Stop-Process -Name ollama -Force`** (or change port via **`$env:OLLAMA_HOST`**) |
+
+## old version below
 | Feature | v1.0.0 (single-turn) | v1.1.1 |
 |---------|------------------|-----------------------|
 | Retrieval store | FAISS index of Lilian Weng blog | same index  |
