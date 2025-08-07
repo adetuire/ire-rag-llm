@@ -16,3 +16,5 @@ dumps/
 *.xml
 *.jsonl
 *.bin
+
+src/ire_rag_llm.egg-info/

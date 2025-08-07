@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 from langchain_core.tools import tool
+<<<<<<< HEAD
 
 # IMPORTANT: import the factory and CALL IT to get the store instance
 # If in your repo it's named get_vector_store(), adjust the import and call.
@@ -23,6 +24,9 @@ def _retrieve_impl(query: str):
         for d in docs
     )
     return serialized, docs
+=======
+from rag.vector import vector_store
+>>>>>>> origin/main
 
 
 @tool(response_format="content_and_artifact")

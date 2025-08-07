@@ -296,8 +296,89 @@ If you prefer a zero-network terminal chat, use the built-in CLI.
 ```
 
 ## V1.0.0 README below
+## Offline Run(hf + ollama)
+```bash
+    "No cloud keys, no OpenAI fees, everything happens on your laptop."
+```
+## 1.  Install the extra wheels
+```bash
+    pip install -U langchain-ollama langchain-huggingface ollama
+```
+## 2. use a tools-enabled model based on your memory size
+```bash
+    ollama pull mistral:7b-instruct
+```
+## 3. Build the FAISS index once
+```bash
+    python scripts/build_index.py
+
+```
+    This downloads Lilian Weng’s RAG blog post, chunks it, embeds with the free
+    
+    sentence-transformers/all-MiniLM-L6-v2 model and writes
+    
+    data/faiss_blog/.
+
+## 4. Start the lacal ollama
+```bash
+    ollama serve &   # keep running in a seperate tab
+    uvicorn src.rag.app:app - reload --port 8000
+```
+## 5. Now you can use it
+```bash
+    # one-off curl
+    curl -X POST http://localhost:8000/chat \
+    
+         -H "Content-Type: application/json" \
+    
+         -d '{"history": [], "message": "Hi 👋"}'
+
+    # two-turn example
+    curl -X POST http://localhost:8000/chat \
+        
+         -H "Content-Type: application/json" \
+        
+         -d '{"history": [{"role":"user","content":"Hi"}, {"role":"assistant","content":"Hello! How can I help?"}], "message": "What is task decomposition?"}'
+```
+    Ollama streams the tokens in the terminal running uvicorn;  
+    
+    curl returns a compact JSON answer:
+```bash
+    {
+        "answer": "Task decomposition means breaking a complex objective into smaller actions so an autonomous agent can solve each one in turn..."
+    }
+```
+
+---
+
+## Command-line chat
+
+If you prefer a zero-network terminal chat, use the built-in CLI.
+
+### Run
+
+```bash
+    python src/rag/chat_cli.py
+
+    After running: "pip install -e ."
+
+    run: rag-chat
+```
+
+## Example of a session
+```bash
+        Conversational RAG (Ctrl-C to quit)
+    you ▸ Hi
+    rag ▸ Hello! How can I help?
+
+    you ▸ What is task decomposition?
+    rag ▸ Task decomposition is the practice of breaking a complex goal …
+```
+
+## V1.0.0 README below
     Legacy single-turn RAG scripts now live in src/rag/legacy/; the main package contains only the v2 conversational pipeline.
 
+### V1.0.0
 ### V1.0.0
 
 A local Retrieval-Augmented Generation (RAG) demo using FAISS + HuggingFace embeddings (free) and an optional LLM-API pipeline.  
