@@ -8,7 +8,7 @@ v2 runs fully local by default: **Ollama** for the LLM and **Hugging Face senten
 
 ## What’s in v2?
 
-| Area | v2 (1.1.1) |
+| Area | v2 (1.2.0) |
 |---|---|
 | LLM | Local **Ollama** (`mistral:7b` by default) |
 | Retrieval store | FAISS (Hugging Face `all-MiniLM-L6-v2`) |
