@@ -5,8 +5,17 @@ Conversational RAG – terminal chat.
 $ python scripts/chat_cli.py
 """
 import json, sys, typer
-import pyreadline3 
 from rag.conversational_chain import chat_rag
+
+import platform
+
+try:
+    if platform.system() == "Windows":
+        import pyreadline3 as readline      # Windows console handling
+    else:
+        import readline                     # GNU readline on linux / macOS
+except ImportError:
+    readline = None  # fallback: Typer will use its own prompt
 
 app = typer.Typer(add_completion=False)
 history: list[dict] = []          # running dialogue
