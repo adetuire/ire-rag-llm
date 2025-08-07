@@ -1,4 +1,0 @@
-[console_scripts]
-rag-chat = rag.chat_cli:chat
-run-rag = rag.run_rag:main
-run-retrieval = rag.run_retrieval:main

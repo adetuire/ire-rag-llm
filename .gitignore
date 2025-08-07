@@ -5,3 +5,16 @@ __pycache__/
 data/*.faiss
 data/raw/
 data/**
+
+
+dumps/
+*.faiss
+*.pkl
+*.npz
+*.npy
+*.bz2
+*.xml
+*.jsonl
+*.bin
+
+src/ire_rag_llm.egg-info/

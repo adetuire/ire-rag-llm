@@ -22,4 +22,11 @@ huggingface_hub>=0.2.1
 python-dotenv>=1.1.1
 
 typer>=0.10.0
+<<<<<<< HEAD
 pyreadline3 >=3.5.0
+
+mwparserfromhell >=0.6.9
+mwxml >=0.18.0
+=======
+pyreadline3 >=3.5.0
+>>>>>>> origin/main
