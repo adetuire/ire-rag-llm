@@ -5,7 +5,7 @@ Conversational RAG – terminal chat.
 $ python scripts/chat_cli.py
 """
 import json, sys, typer
-import pyreadline3 as readline
+import pyreadline3 
 from rag.conversational_chain import chat_rag
 
 app = typer.Typer(add_completion=False)
