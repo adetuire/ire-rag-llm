@@ -26,7 +26,9 @@ dependencies = [
   "faiss-cpu>=1.11.0",
   "torch>=2.2",
   "mwparserfromhell",
-  "mwxml"
+  "mwxml",
+  "typer",
+  "pyreadline3"
 ]
 
 #tells setuptools to look inside /src
