@@ -1,5 +1,23 @@
 # IRE-RAG-LLM
-### v1.3.1 — 10k wiki + one-shot CLI
+### v1.3.1 — chat print fix & tiny-model tools fallback
+
+# Fixes
+
+    rag-chat now prints only the assistant’s answer, not the whole graph dict.
+
+    Tools path works better with tiny Ollama models that don’t emit structured tool_calls:
+
+        If the model outputs a JSON-type “function call” as text, we parse it and run retrieval anyway.
+
+# Note
+
+    Docs: show how to suppress noisy FutureWarnings from MiniLM/BERT.
+
+    Clarified env toggles:
+
+        RAG_USE_TOOLS=0 -> most reliable on 1B/CPU models.
+
+        RAG_USE_TOOLS=1 -> enables retrieval tools; works best with models that support function calling.
 
 **Goal:** Build a FAISS index (small demo or ~10k Simple English Wikipedia) and run a one-shot CLI query that prints an **answer** and a small **metrics JSON**.
 
