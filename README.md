@@ -1,5 +1,5 @@
 # IRE-RAG-LLM
-### v1.3.0 — 10k wiki + one-shot CLI
+### v1.3.1 — 10k wiki + one-shot CLI
 
 **Goal:** Build a FAISS index (small demo or ~10k Simple English Wikipedia) and run a one-shot CLI query that prints an **answer** and a small **metrics JSON**.
 

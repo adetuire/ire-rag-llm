@@ -1,32 +1,16 @@
-# pyright: reportUnusedImport=false, reportMissingTypeStubs=false
-# The directives above silence warnings about runtime-only imports and local modules without stubs.
-
 # src/rag/chat_cli.py
-import os
+# pyright: reportMissingTypeStubs=false
 import typer
-from typing import Any, Dict, List, cast
-
-# Import the conversational chain from the local module.
-try:  # pragma: no cover
-    import pyreadline3 as _pyreadline3  
-    import readline as _readline        
-except Exception:
-    pass
-
-# Import the conversational chain from the local module.
-from .conversational_chain import chain  # type: ignore
+from typing import List
+from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
+from .conversational_chain import chain  # the compiled graph
 
 app = typer.Typer(add_completion=False)
 
 @app.command()
 def main() -> None:
-    """
-    Simple REPL-style chat using the conversational chain.
-    Ctrl+C / Ctrl+D or 'exit' to quit.
-    """
     print("Interactive chat. Type 'exit' to quit.\n")
-
-    history: List[Dict[str, str]] = []
+    history: List[BaseMessage] = []
 
     while True:
         try:
@@ -34,26 +18,35 @@ def main() -> None:
         except (EOFError, KeyboardInterrupt):
             print("\nbye!")
             return
-
         if user.lower() in {"exit", "quit"}:
             print("bye!")
             return
         if not user:
             continue
 
-        # Prepare the state for the chain
-        state: Dict[str, Any] = {"messages": history + [{"role": "user", "content": user}]}
+        history.append(HumanMessage(content=user))
 
-        # Pylance type checking: ensure chain is callable
-        resp = cast(Any, chain).invoke(cast(Any, state))
-        content = getattr(resp, "content", resp)
+        # LangGraph returns {"messages": [...]}
+        out = chain.invoke({"messages": history})
+        msgs = out.get("messages", []) if isinstance(out, dict) else []
+        last = None
+        if isinstance(msgs, list) and msgs:
+            # prefer last AI message if present
+            for m in reversed(msgs):
+                if getattr(m, "type", None) == "ai":
+                    last = m
+                    break
+            if last is None:
+                last = msgs[-1]
+        else:
+            last = out  # fallback
 
+        content = getattr(last, "content", str(last))
         if not isinstance(content, str):
             content = str(content)
 
         print(f"bot> {content}\n")
-        history.append({"role": "user", "content": user})
-        history.append({"role": "assistant", "content": content})
+        history.append(AIMessage(content=content))
 
 if __name__ == "__main__":
     app()
