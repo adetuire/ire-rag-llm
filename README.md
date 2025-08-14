@@ -1,4 +1,32 @@
 # IRE-RAG-LLM
+### v1.3.0 Reproduce (10k wiki + CLI query)
+
+```bash
+# 1) Install
+python -m venv .venv && source .venv/Scripts/activate   # mac/linux: .venv/bin/activate
+pip install -e .
+
+# 2) Build ~10k Simple English Wikipedia pages → FAISS
+make wiki_10k
+export RAG_INDEX_DIR=data/faiss_wiki   # PowerShell:  $env:RAG_INDEX_DIR="data/faiss_wiki"
+
+# 3) One-shot CLI query (prints answer + small metrics block)
+rag-ask --query "Who is Ada Lovelace?" --k 4
+# or: make ask Q="Who is Ada Lovelace?" K=4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##  Version 1.2.0 — Conversational RAG (LangGraph + local Ollama + FAISS)
 
 This repo contains a **conversational** RAG pipeline (v1.2) and **legacy single-turn** RAG (v1).  

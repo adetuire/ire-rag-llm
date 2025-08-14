@@ -1,0 +1,20 @@
+PY?=python
+
+# Build ~10k Simple English Wikipedia pages → FAISS index
+wiki_10k:
+	mkdir -p dumps
+	curl -L -o dumps/simplewiki-latest-pages-articles.xml.bz2 \
+	  https://dumps.wikimedia.org/simplewiki/latest/simplewiki-latest-pages-articles.xml.bz2
+	$(PY) scripts/wiki_extract.py --dump dumps/simplewiki-latest-pages-articles.xml.bz2 --out data/wiki_docs --limit 10000
+	$(PY) scripts/build_index.py --docs data/wiki_docs --out data/faiss_wiki
+	@echo "export RAG_INDEX_DIR=data/faiss_wiki"
+
+# Quick demo index (Lilian Weng blog)
+demo_index:
+	$(PY) scripts/build_index.py
+	@echo "export RAG_INDEX_DIR=data/faiss_blog"
+
+# One-shot ask (RAG_INDEX_DIR must be set in env)
+ask:
+	@if [ -z "$$RAG_INDEX_DIR" ]; then echo "Set RAG_INDEX_DIR first"; exit 1; fi
+	$(PY) -m src.rag.ask_cli --query "$(Q)" --k $(K)
