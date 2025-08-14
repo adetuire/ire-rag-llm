@@ -38,10 +38,14 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
  
+[tool.pyright]
+typeCheckingMode = "basic"
+reportMissingTypeStubs = "none"
+# Keep unused-imports as warnings project-wide; we already silence them per-file where needed
+reportUnusedImport = "warning"
+
 
 #creates the two console-scripts
 [project.scripts]
-run-retrieval = "rag.run_retrieval:main"
-run-rag       = "rag.run_rag:main"
 rag-chat      = "rag.chat_cli:app"
 rag-ask       = "rag.ask_cli:app"

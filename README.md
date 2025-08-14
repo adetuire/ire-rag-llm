@@ -1,31 +1,112 @@
 # IRE-RAG-LLM
-### v1.3.0 Reproduce (10k wiki + CLI query)
+### v1.3.0 — 10k wiki + one-shot CLI
+
+**Goal:** Build a FAISS index (small demo or ~10k Simple English Wikipedia) and run a one-shot CLI query that prints an **answer** and a small **metrics JSON**.
+
+---
+
+## works on any OS
 
 ```bash
-# 1) Install
-python -m venv .venv && source .venv/Scripts/activate   # mac/linux: .venv/bin/activate
+# 0) Setup
+python -m venv .venv
+# Windows (PowerShell):  .\.venv\Scripts\Activate.ps1
+# macOS/Linux (bash):    source .venv/bin/activate
 pip install -e .
 
-# 2) Build ~10k Simple English Wikipedia pages → FAISS
-make wiki_10k
-export RAG_INDEX_DIR=data/faiss_wiki   # PowerShell:  $env:RAG_INDEX_DIR="data/faiss_wiki"
+# 1) Smallest demo index (CPU-only)
+python scripts/build_index.py
+# Windows (PowerShell): $env:RAG_INDEX_DIR="data\faiss_blog"
+# macOS/Linux:          export RAG_INDEX_DIR=data/faiss_blog
 
-# 3) One-shot CLI query (prints answer + small metrics block)
+# 2) One-shot query (tiny local model OPTIONAL; see Option A/B below)
+python -m rag.ask_cli --query "Who is Ada Lovelace?" --k 4
+If rag-ask is available as a console command, you can use rag-ask --query "..." --k 4. If not, the python -m rag.ask_cli variant always works.
+
+## Install
+
+python -m venv .venv
+# Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
+# macOS/Linux
+source .venv/bin/activate
+
+pip install -e .
+
+## Build an index (choose ONE)
+A) Quick demo (smallest, CPU-only)
+
+python scripts/build_index.py            # writes data/faiss_blog/
+# Windows (PowerShell)
+$env:RAG_INDEX_DIR="data\faiss_blog"
+# macOS/Linux
+export RAG_INDEX_DIR=data/faiss_blog
+B) Wikipedia (~10k Simple English pages)
+Windows (no make)
+
+mkdir dumps
+Invoke-WebRequest -Uri https://dumps.wikimedia.org/simplewiki/latest/simplewiki-latest-pages-articles.xml.bz2 `
+  -OutFile dumps\simplewiki-latest-pages-articles.xml.bz2
+python scripts\wiki_extract.py --dump dumps\simplewiki-latest-pages-articles.xml.bz2 --out data\wiki_docs --limit 10000
+python scripts\build_index.py --docs data\wiki_docs --out data\faiss_wiki
+$env:RAG_INDEX_DIR="data\faiss_wiki"
+
+macOS/Linux
+
+mkdir -p dumps
+curl -L -o dumps/simplewiki-latest-pages-articles.xml.bz2 \
+  https://dumps.wikimedia.org/simplewiki/latest/simplewiki-latest-pages-articles.xml.bz2
+python scripts/wiki_extract.py --dump dumps/simplewiki-latest-pages-articles.xml.bz2 --out data/wiki_docs --limit 10000
+python scripts/build_index.py --docs data/wiki_docs --out data/faiss_wiki
+export RAG_INDEX_DIR=data/faiss_wiki
+
+## Run a one-shot query (two easy options)
+# Option A — Full RAG (tiny local model with Ollama)
+Good for low-RAM laptops. Recommended models:
+
+llama3.2:1b-instruct-q4_K_M (very light)
+
+phi3:mini-4k-instruct-q4_K_M (also light)
+
+# Terminal A: start Ollama and pull a tiny model
+ollama serve
+ollama pull llama3.2:1b-instruct-q4_K_M   # or: phi3:mini-4k-instruct-q4_K_M
+
+# Terminal B: run the ask CLI
+# Windows (PowerShell)
+$env:RAG_MODEL="llama3.2:1b-instruct-q4_K_M"
+# macOS/Linux
+export RAG_MODEL=llama3.2:1b-instruct-q4_K_M
+
 rag-ask --query "Who is Ada Lovelace?" --k 4
-# or: make ask Q="Who is Ada Lovelace?" K=4
+# (or) python -m rag.ask_cli --query "Who is Ada Lovelace?" --k 4
+Example metrics JSON (your numbers will differ):
+
+{
+  "k": 4,
+  "retrieval_ms": 69.5,
+  "generation_ms": 7484.7,
+  "context_tokens_approx": 60,
+  "model": "llama3.2:1b-instruct-q4_K_M",
+  "index_dir": "data/faiss_blog"
+}
+
+# Option B — No-Ollama (automatic retrieval-only fallback)
+If an LLM isn’t available, the CLI prints a top-doc snippet as the “answer” and sets "model": "retrieval_only (...)".
+
+# Always works (no model needed)
+python -m rag.ask_cli --query "Who is Ada Lovelace?" --k 4
+
+3) Interactive chat (optional)
+bash
+Copy
+Edit
+rag-chat
+# or
+python -m rag.chat_cli
 
 
-
-
-
-
-
-
-
-
-
-
-
+end.
 
 ##  Version 1.2.0 — Conversational RAG (LangGraph + local Ollama + FAISS)
 
