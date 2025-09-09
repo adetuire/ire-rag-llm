@@ -29,6 +29,7 @@
 # 0) Setup
 python -m venv .venv
 # Windows (PowerShell):  .\.venv\Scripts\Activate.ps1
+# Windows (bash/git)     source .venv/Scripts/activate
 # macOS/Linux (bash):    source .venv/bin/activate
 pip install -e .
 
